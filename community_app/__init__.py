@@ -2,11 +2,15 @@ from flask import Flask
 from config import DeveloperConfig, Testing, Config
 import os
 import dotenv
-from routes.questions import question_bp
-from routes.responses import response_bp
+from community_app.routes.questions import question_bp
+from community_app.routes.responses import response_bp
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+# from community_app import db
 
 
+
+migrate = Migrate()
 db = SQLAlchemy()
 dotenv.load_dotenv()
 config_name = os.getenv("Flask_ENV")
@@ -26,7 +30,10 @@ config_set_up = {
 
 def create_app():
     app = Flask(__name__)
-    db.init_app(app)
     app.config.from_object(DeveloperConfig)
+    db.init_app(app)
+    migrate.init_app(app, db)
     app.register_blueprint(question_bp)
     app.register_blueprint(response_bp)
+
+    return app
