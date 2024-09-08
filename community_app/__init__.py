@@ -1,12 +1,12 @@
 from flask import Flask
 import os
 import dotenv
-from config import DeveloperConfig, Testing, Config
+from config import Config, DevelopmentConfig, TestingConfig, ProductionConfig
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-migrate = Migrate()
 db = SQLAlchemy()
+migrate = Migrate()
 
 from community_app.routes.questions import question_bp
 from community_app.routes.responses import response_bp
@@ -17,22 +17,23 @@ app = Flask(__name__)
 app.register_blueprint(question_bp)
 app.register_blueprint(response_bp)
 
-config_name = os.getenv('FLASK_ENV')
+config_name = os.environ.get('FLASK_ENV', 'development')
 
-config_set_up = {
-    'production': Config,
-    'development': DeveloperConfig,
-    'testing': Testing,
+# Определяем соответствующие классы конфигурации на основе значения переменной окружения FLASK_ENV
+config_class = {
+ 'development': DevelopmentConfig,
+ 'testing': TestingConfig,
+ 'production': ProductionConfig
 }.get(config_name)
 
+# Применяем конфигурацию к приложению
+if config_class:
+ app.config.from_object(config_class)
 
 def create_app():
-    app = Flask(__name__)
-    app.config.from_object(config_set_up)
 
-    # Ensure SQLALCHEMY_DATABASE_URI is set
-    if not app.config.get('SQLALCHEMY_DATABASE_URI'):
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+    app = Flask(__name__)
+    app.config.from_object(DevelopmentConfig)
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -40,4 +41,9 @@ def create_app():
     app.register_blueprint(question_bp)
     app.register_blueprint(response_bp)
 
+    @app.route('/')
+    def home():
+        return "Wellcome to the Community Pulse App"
+
     return app
+
