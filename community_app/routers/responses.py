@@ -1,13 +1,11 @@
 from flask import Blueprint, make_response, jsonify
 from community_app.models.questions import Statistics
 
-response_bp = Blueprint('responses', __name__, url_prefix= '/responses')
-
+response_bp = Blueprint('responses', __name__, url_prefix='/responses')
 
 
 @response_bp.route('/', methods=['GET'])
 def get_responses():
-    """Получение агрегированной статистики ответов."""
     statistics = Statistics.query.all()
     results = [
         {
@@ -22,12 +20,6 @@ def get_responses():
     return response
 
 
-
-@response_bp.route('/')
-def get_all_responses():
-    return "ALL RESPONSES"
-
-
-@response_bp.route('/add', methods = ['POST'])
-def add_new_responses():
+@response_bp.route('/', methods=['POST'])
+def add_responses():
     return "RESPONSE IS ADDED"

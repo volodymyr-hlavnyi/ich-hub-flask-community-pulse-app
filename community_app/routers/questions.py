@@ -1,8 +1,28 @@
+from crypt import methods
+
 from flask import Blueprint, jsonify, make_response, request
 from community_app.models.questions import Questions
 from community_app import db
 
 question_bp = Blueprint('questions', __name__, url_prefix='/questions')
+
+
+@question_bp.route('/<int:question_id>', methods=['GET'])
+def get_question(question_id):
+    question: Questions = Questions.query.get(question_id)
+
+    if not question:
+        return make_response(jsonify({
+            "message": "NOT FOUND"
+        }), 404)
+
+    question_data = {
+        "id": question.id,
+        "text": question.text,
+        "created_at": question.created_at
+    }
+
+    return jsonify(question_data)
 
 
 @question_bp.route('/', methods=['GET'])  # url/questions/
@@ -59,3 +79,20 @@ def update_question(question_id):
         return make_response(jsonify({
             "message": "NO DATA PROVIDED"
         }), 204)
+
+
+@question_bp.route('/<int:id>', methods=['DELETE'])
+def delete_question(id):
+    question: Questions = Questions.query.get(id)
+
+    if not question:
+        return make_response(jsonify({
+            "message": "NOT FOUND"
+        }), 404)
+
+    db.session.delete(question)
+    db.session.commit()
+
+    return make_response(jsonify({
+        "message": "DELETED"
+    }), 200)

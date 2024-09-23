@@ -24,3 +24,6 @@ class Statistics(db.Model):
         return (f'Statistics for question {self.question_id}, agreed  {self.agree_count}, '
                 f'disagreed: {self.disagree_count}')
 
+    def __repr__(self):
+        # return self.__str__()
+        return '<Statistic for Question %r: %r agree, %r disagree>' % (self.question_id, self.agree_count, self.disagree_count)
