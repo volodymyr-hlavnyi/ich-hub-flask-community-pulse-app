@@ -13,7 +13,7 @@ from community_app.routers.responses import response_bp
 
 from community_app.models.responses import Responses
 from community_app.models.questions import Questions
-
+from community_app.models.category import Category
 dotenv.load_dotenv()
 
 app = Flask(__name__)
