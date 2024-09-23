@@ -8,9 +8,12 @@ from flask_migrate import Migrate
 db = SQLAlchemy()
 migrate = Migrate()
 
-from community_app.routes.questions import question_bp
-from community_app.routes.responses import response_bp
+from community_app.routers.questions import question_bp
+from community_app.routers.responses import response_bp
 
+from community_app.models.responses import Responses
+from community_app.models.questions import Questions
+from community_app.models.category import Category
 dotenv.load_dotenv()
 
 app = Flask(__name__)
@@ -21,17 +24,17 @@ config_name = os.environ.get('FLASK_ENV', 'development')
 
 # Определяем соответствующие классы конфигурации на основе значения переменной окружения FLASK_ENV
 config_class = {
- 'development': DevelopmentConfig,
- 'testing': TestingConfig,
- 'production': ProductionConfig
+    'development': DevelopmentConfig,
+    'testing': TestingConfig,
+    'production': ProductionConfig
 }.get(config_name)
 
 # Применяем конфигурацию к приложению
 if config_class:
- app.config.from_object(config_class)
+    app.config.from_object(config_class)
+
 
 def create_app():
-
     app = Flask(__name__)
     app.config.from_object(DevelopmentConfig)
 
@@ -46,4 +49,3 @@ def create_app():
         return "Wellcome to the Community Pulse App"
 
     return app
-
