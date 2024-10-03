@@ -1,4 +1,5 @@
 from crypt import methods
+from unicodedata import category
 
 from flask import Blueprint, jsonify, make_response, request
 from community_app.models.questions import Questions
@@ -22,7 +23,7 @@ def get_question(question_id):
         "created_at": question.created_at
     }
 
-    return jsonify(question_data)
+    return jsonify(question_data), 200
 
 
 @question_bp.route('/', methods=['GET'])  # url/questions/
@@ -59,6 +60,21 @@ def add_new_question():
                     "question_id": question.id}), 201
 
 
+@question_bp.route('/', methods=['POST'])
+def create_question():
+    """Создание нового вопроса."""
+    data = request.get_json()  # Получаем данные из запроса в формате JSON
+    if not data or 'text' not in data:
+        # Проверяем, что текст вопроса присутствует в данных
+        return jsonify({'error': 'No question text provided'}), 400
+
+    # Создаем экземпляр вопроса
+    question = Questions(text=data['text'], category_id=data['category_id'])
+    db.session.add(question)  # Добавляем вопрос в сессию для записи
+    db.session.commit()  # Фиксируем изменения в базе данных
+    return jsonify({'message': 'Вопрос создан', 'id': question.id}), 201
+
+
 @question_bp.route('/update/<int:question_id>', methods=['PUT'])
 def update_question(question_id):
     question: Questions = Questions.query.get(question_id)
@@ -67,7 +83,9 @@ def update_question(question_id):
         return make_response(jsonify({
             "message": "NOT FOUND"
         }), 404)
+
     request_data = request.get_json()
+
     if request_data['text']:
         question.text = request_data['text']
         db.session.commit()
@@ -94,5 +112,5 @@ def delete_question(id):
     db.session.commit()
 
     return make_response(jsonify({
-        "message": "DELETED"
+        "message": "DELETED with ID: " + str(id)
     }), 200)
