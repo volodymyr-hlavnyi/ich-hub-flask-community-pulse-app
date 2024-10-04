@@ -1,9 +1,9 @@
-from crypt import methods
-from unicodedata import category
-
 from flask import Blueprint, jsonify, make_response, request
+from pydantic import ValidationError
+
 from community_app.models.questions import Questions
 from community_app import db
+from community_app.schemas.question import QuestionCreate, QuestionResponse
 
 question_bp = Blueprint('questions', __name__, url_prefix='/questions')
 
@@ -24,6 +24,15 @@ def get_question(question_id):
     }
 
     return jsonify(question_data), 200
+
+
+@question_bp.route('/', methods=['GET'])
+def get_questions():
+    """Получение списка всех вопросов."""
+    questions = Questions.query.all()
+    # Сериализуем объекты SQLAlchemy в Pydantic модели
+    results = [QuestionResponse.from_orm(question).dict() for question in questions]
+    return jsonify(results), 200
 
 
 @question_bp.route('/', methods=['GET'])  # url/questions/
@@ -64,12 +73,13 @@ def add_new_question():
 def create_question():
     """Создание нового вопроса."""
     data = request.get_json()  # Получаем данные из запроса в формате JSON
-    if not data or 'text' not in data:
-        # Проверяем, что текст вопроса присутствует в данных
-        return jsonify({'error': 'No question text provided'}), 400
+    try:
+        question_data = QuestionCreate(**data)
+    except ValidationError as e:
+        return jsonify({'message': 'Ошибка валидации', 'errors': e.errors()}), 400
 
     # Создаем экземпляр вопроса
-    question = Questions(text=data['text'], category_id=data['category_id'])
+    question = Questions(text=question_data.text, category_id=question_data.category_id)
     db.session.add(question)  # Добавляем вопрос в сессию для записи
     db.session.commit()  # Фиксируем изменения в базе данных
     return jsonify({'message': 'Вопрос создан', 'id': question.id}), 201

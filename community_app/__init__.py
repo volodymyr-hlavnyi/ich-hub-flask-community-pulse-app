@@ -13,12 +13,13 @@ from community_app.routers.responses import response_bp
 
 from community_app.models.responses import Responses
 from community_app.models.questions import Questions
-from community_app.models.category import Category
+from community_app.routers.categories import category_bp
 dotenv.load_dotenv()
 
 app = Flask(__name__)
 app.register_blueprint(question_bp)
 app.register_blueprint(response_bp)
+app.register_blueprint(category_bp)
 
 config_name = os.environ.get('FLASK_ENV', 'development')
 
