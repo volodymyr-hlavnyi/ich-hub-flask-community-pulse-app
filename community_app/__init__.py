@@ -10,10 +10,12 @@ migrate = Migrate()
 
 from community_app.routers.questions import question_bp
 from community_app.routers.responses import response_bp
+from community_app.routers.categories import category_bp
 
 from community_app.models.responses import Responses
 from community_app.models.questions import Questions
-from community_app.routers.categories import category_bp
+from community_app.models.categories import Categories
+
 dotenv.load_dotenv()
 
 app = Flask(__name__)
@@ -44,7 +46,7 @@ def create_app():
 
     app.register_blueprint(question_bp)
     app.register_blueprint(response_bp)
-
+    app.register_blueprint(category_bp)
     @app.route('/')
     def home():
         return "Wellcome to the Community Pulse App"

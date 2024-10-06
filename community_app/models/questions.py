@@ -7,7 +7,7 @@ class Questions(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     text = db.Column(db.String(300), nullable = False)
     created_at = db.Column(db.DateTime, default = datetime.utcnow)
-    category_id = db.Column(db.Integer, db.ForeignKey('Category.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
 
     responses = db.relationship("Responses", backref = 'question')
 
